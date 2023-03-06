@@ -1,3 +1,39 @@
+#### About #### 
+
+#This function computes standard errors for a geographic regression distontinuity where 
+#the error term is assumed to be correlated in space, and that spaital correlation structure 
+#is estiamted directly from the residuals. 
+#The advantage of this approch is that the researcher allows the data to select the range 
+#of the autocorrelation, rather than guessing. The problem with guessing is researcher degrees of 
+#freedom: typical approaches for spatial autocorrelation rely on the researcher selecting 
+# a range, which can encourage selective reporting of results. 
+
+#This function works in several steps: it computes the MSE optimal bandwidth for the RD, 
+#then it computes the residual for the regression of the outcome on the treatment and running variable 
+#within the MSE optiminal bandwidth using a uniform weighting kernel. 
+
+#Then, it estiamtes the range of spatial autocorrelation from the residual. 
+
+#Third, it computes the standard error using the range found in step 2. 
+
+#Forth, it creates output, showing the coefficient for the RD, the range selected, the standard error, 
+#the p-value, the size of the MSE bandwidth, and the number of observations inlcuded in the analysis. 
+
+#Optional arguments allow the user to make several modifications to the original RD. 
+
+#covs allows a user to define covariates to include in the RD, which can be included if a user selects 
+#adjust = TRUE, and then includes a concatenated list of the covariates. 
+
+#p allows the user to change the RD polynomial. No more than 2 is recommended (See Imbens and Gelman). 
+
+#lat_long is a boolean argument that allows the user to change from the `poolng' geographic RD that 
+#treats the running variable as a one dimensional feature (distance to the border) to a multidimensional 
+#feature that includes latitude, longitude, and their interaction. A caution here is that in very 
+#spatially condensed datasets, there may be insufficient support for higher-order polynomials. 
+
+#a user can override the bandwidth calculation with user_bw = TRUE, and then input their own bandwidth with 
+#input_bw. 
+
 grdrobust <- function(data, run_var, out, treat, adjust, covs, theta_start, crs, p, lat_long, user_bw, input_bw){
   
   packs <- c('intamap', 'sp', 'dplyr', 'purrr', 'sf', 'rdrobust', 'fields')
