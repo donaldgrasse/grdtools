@@ -1,8 +1,19 @@
+#### About #### 
+#This function `defines' the RD - it takes as arguments the data (an sf object with coordinates), 
+#the polygon that defines the `action' (or treatment), the polygon that contains control units, 
+#a polygon that defines the study area (most likely the union of action and control), 
+#the coordinate reference system, and a boolean argument for whether fixed effects 
+#should be constructed for difference border points (see Dell 2010). 
+
+
 define_RD <- function(data, action_polygon, control_polygon, study_area, crs, segment_fe){
   
+  #read required packages 
   packs <- c('sf',  'sp', 'dplyr', 'purrr', 'nngeo')
   suppressMessages(lapply(packs, require, character.only = T))
   
+  #prep data to all be in the same 
+  #crs 
   action_polygon <- action_polygon
   control_polygon <- control_polygon
   crs <- crs 
@@ -20,6 +31,9 @@ define_RD <- function(data, action_polygon, control_polygon, study_area, crs, se
   data <- data %>% 
     st_transform(crs = crs)
   
+  
+  #function to make the border for the study
+  #the cutoff for the running variable 
   makes_study_border <- function(action_polygon, control_polygon, crs){
     
     x_and_y <- st_intersection(action_polygon$geometry, control_polygon$geometry) %>% 
@@ -37,6 +51,7 @@ define_RD <- function(data, action_polygon, control_polygon, study_area, crs, se
   
   line_as_line <- makes_study_border(action_polygon, control_polygon, crs)
   
+  #define treatment and the running variable 
   data$treat <- as.numeric(as.numeric(st_distance(data$geometry, action_polygon$geometry))==0,1,0)
   data$dist_border <- ifelse(data$treat == 1, as.numeric(st_distance(data$geometry, line_as_line))*1, 
                              as.numeric(st_distance(data$geometry, line_as_line))*-1)
